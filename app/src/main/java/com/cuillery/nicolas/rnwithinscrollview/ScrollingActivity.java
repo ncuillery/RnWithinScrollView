@@ -5,15 +5,38 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.TypedValue;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.FrameLayout;
+import android.widget.FrameLayout.LayoutParams;
+
+import com.facebook.react.LifecycleState;
+import com.facebook.react.ReactInstanceManager;
+import com.facebook.react.ReactRootView;
+import com.facebook.react.shell.MainReactPackage;
 
 public class ScrollingActivity extends AppCompatActivity {
+
+    private ReactRootView mReactRootView;
+    private ReactInstanceManager mReactInstanceManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        mReactInstanceManager = ReactInstanceManager.builder()
+                .setApplication(getApplication())
+                .setBundleAssetName("index.android.bundle")
+                .setJSMainModuleName("index.android")
+                .addPackage(new MainReactPackage())
+                .setUseDeveloperSupport(BuildConfig.DEBUG)
+                .setInitialLifecycleState(LifecycleState.RESUMED)
+                .build();
+
+        mReactRootView = new ReactRootView(this);
+
         setContentView(R.layout.activity_scrolling);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -26,6 +49,19 @@ public class ScrollingActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
+
+        FrameLayout content = (FrameLayout) findViewById(R.id.content);
+
+        // UNSPECIFIED height because of the parent ScrollView: Cause an IllegalStateException
+        LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+
+        // EXACTLY height arbitrary set to 300dp: Works
+        //int size = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 2000, getResources().getDisplayMetrics());
+        //LayoutParams lp = new LayoutParams(LayoutParams.MATCH_PARENT, size);
+
+        mReactRootView.setLayoutParams(lp);
+        content.addView(mReactRootView);
+
     }
 
     @Override
